@@ -28,7 +28,7 @@ function createReport(result) {
   ].join("\n");
 }
 
-export function RiskResults({ result, onRetake }) {
+export function RiskResults({ result, onRetake, retakeHref }) {
   const handleDownload = () => {
     const blob = new Blob([createReport(result)], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -66,8 +66,9 @@ export function RiskResults({ result, onRetake }) {
             <ResultActions
               compact
               onDownload={handleDownload}
-              onShare={handleShare}
               onRetake={onRetake}
+              onShare={handleShare}
+              retakeHref={retakeHref}
             />
           </div>
           <SummaryCard result={result} />
@@ -82,8 +83,9 @@ export function RiskResults({ result, onRetake }) {
       <section className="mx-auto mt-[30px] max-w-[1380px]">
         <ResultActions
           onDownload={handleDownload}
-          onShare={handleShare}
           onRetake={onRetake}
+          onShare={handleShare}
+          retakeHref={retakeHref}
         />
       </section>
 

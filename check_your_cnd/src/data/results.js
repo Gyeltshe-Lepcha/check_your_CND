@@ -1,10 +1,12 @@
 import {
   ActivityIcon,
+  AlertIcon,
   BrainIcon,
   GaugeIcon,
   HeartIcon,
   ScaleIcon,
   StethoscopeIcon,
+  UserIcon,
 } from "@/components/icons/Icons";
 
 export const summaryItems = [
@@ -13,6 +15,12 @@ export const summaryItems = [
     label: "Age",
     icon: GaugeIcon,
     format: (value) => `${value} yrs`,
+  },
+  {
+    key: "gender",
+    label: "Gender",
+    icon: UserIcon,
+    format: (value) => value,
   },
   {
     key: "weight",
@@ -33,9 +41,27 @@ export const summaryItems = [
     format: (_, summary) => `${summary.systolic}/${summary.diastolic}`,
   },
   {
+    key: "cholesterol",
+    label: "Cholesterol",
+    icon: StethoscopeIcon,
+    format: (value) => (value ? `${value} mg/dL` : "Not provided"),
+  },
+  {
+    key: "glucose",
+    label: "Glucose",
+    icon: GaugeIcon,
+    format: (value) => (value ? `${value} mg/dL` : "Not provided"),
+  },
+  {
     key: "activityLevel",
     label: "Activity Level",
     icon: ActivityIcon,
+    format: (value) => value,
+  },
+  {
+    key: "smokingStatus",
+    label: "Smoking Status",
+    icon: AlertIcon,
     format: (value) => value,
   },
   {

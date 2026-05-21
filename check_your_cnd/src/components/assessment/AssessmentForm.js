@@ -2,50 +2,38 @@
 
 import { useState } from "react";
 import { HeartIcon } from "@/components/icons/Icons";
-import { activityOptions, assessmentSections, dietOptions } from "@/data/assessment";
+import {
+  activityOptions,
+  assessmentSections,
+  dietOptions,
+  genderOptions,
+  smokingOptions,
+} from "@/data/assessment";
 import { FormSection } from "@/components/assessment/FormSection";
 import { OptionGroup } from "@/components/assessment/OptionGroup";
 import { RangeInput } from "@/components/assessment/RangeInput";
 import { TextInput } from "@/components/assessment/TextInput";
-import { clusterUser } from "@/lib/riskModel";
 
-export function AssessmentForm({ onComplete }) {
+export function AssessmentForm() {
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState(71);
   const [height, setHeight] = useState(170);
   const [systolic, setSystolic] = useState("120");
   const [diastolic, setDiastolic] = useState("80");
-  const [activityLevel, setActivityLevel] = useState("");
-  const [dietType, setDietType] = useState("");
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const fieldValue = (name, fallback) => {
-      const value = formData.get(name);
-      return value === null || value === "" ? fallback : value;
-    };
-    const result = clusterUser({
-      age: fieldValue("age", age),
-      weight: fieldValue("weight", weight),
-      height: fieldValue("height", height),
-      systolic: fieldValue("systolic", systolic),
-      diastolic: fieldValue("diastolic", diastolic),
-      activityLevel: fieldValue("activityLevel", activityLevel),
-      dietType: fieldValue("dietType", dietType),
-    });
-    onComplete(result);
-  };
+  const [cholesterol, setCholesterol] = useState("");
+  const [glucose, setGlucose] = useState("");
 
   return (
     <form
+      action="/results"
       className="mx-auto mt-[40px] max-w-[960px] rounded-[22px] border border-[#dce6f2] bg-white px-9 py-[45px] shadow-[0_16px_32px_rgba(15,23,42,0.12)] max-sm:px-5"
-      onSubmit={handleSubmit}
+      method="get"
+      noValidate
     >
       <div className="space-y-[45px]">
         <section>
           <FormSection {...assessmentSections[0]} />
-          <div className="mt-[32px]">
+          <div className="mt-[32px] space-y-[33px]">
             <TextInput
               label="Age"
               name="age"
@@ -53,9 +41,14 @@ export function AssessmentForm({ onComplete }) {
               type="number"
               min={1}
               max={120}
-              required
               value={age}
               onChange={setAge}
+            />
+            <OptionGroup
+              label="Gender"
+              name="gender"
+              options={genderOptions}
+              defaultValue="Unknown"
             />
           </div>
         </section>
@@ -86,7 +79,7 @@ export function AssessmentForm({ onComplete }) {
 
         <section>
           <FormSection {...assessmentSections[2]} />
-          <div className="mt-[31px]">
+          <div className="mt-[31px] space-y-[33px]">
             <h3 className="mb-[17px] text-[18px] font-semibold text-[#061633]">
               Blood Pressure (mmHg)
             </h3>
@@ -108,6 +101,28 @@ export function AssessmentForm({ onComplete }) {
                 onChange={setDiastolic}
               />
             </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <TextInput
+                label="Cholesterol (mg/dL)"
+                name="cholesterol"
+                placeholder="206"
+                type="number"
+                min={50}
+                max={500}
+                value={cholesterol}
+                onChange={setCholesterol}
+              />
+              <TextInput
+                label="Glucose (mg/dL)"
+                name="glucose"
+                placeholder="137"
+                type="number"
+                min={40}
+                max={500}
+                value={glucose}
+                onChange={setGlucose}
+              />
+            </div>
           </div>
         </section>
 
@@ -118,15 +133,19 @@ export function AssessmentForm({ onComplete }) {
               label="Physical Activity Level"
               name="activityLevel"
               options={activityOptions}
-              value={activityLevel}
-              onChange={setActivityLevel}
+              defaultValue="Sedentary"
             />
             <OptionGroup
               label="Diet Type"
               name="dietType"
               options={dietOptions}
-              value={dietType}
-              onChange={setDietType}
+              defaultValue="Average"
+            />
+            <OptionGroup
+              label="Smoking Status"
+              name="smokingStatus"
+              options={smokingOptions}
+              defaultValue="Unknown"
             />
           </div>
         </section>

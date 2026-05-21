@@ -2,7 +2,7 @@ import modelArtifacts from "@/data/modelArtifacts.json";
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 const sigmoid = (value) => 1 / (1 + Math.exp(-value));
-const clusterRiskScores = [95, 80, 25];
+const clusterRiskScores = [90, 35, 30];
 
 const bandMeta = {
   "Low Risk": {
@@ -74,16 +74,32 @@ function getGeneralHealth({ bmi, systolic, diastolic, activityLevel, dietType })
 
 function buildFeatureMap(input) {
   const age = Number(input.age) || 42;
+  const gender = input.gender === "Male" ? 1 : input.gender === "Female" ? 0 : null;
   const weight = Number(input.weight) || 71;
   const height = Number(input.height) || 170;
   const systolic = Number(input.systolic) || 120;
   const diastolic = Number(input.diastolic) || 80;
+  const cholesterol = Number(input.cholesterol);
+  const glucose = Number(input.glucose);
   const activityLevel = input.activityLevel || "Sedentary";
   const dietType = input.dietType || "Average";
+  const smokingStatusMap = {
+    "Non-Smoker": 0,
+    Smoker: 1,
+    Unknown: 2,
+  };
+  const smokingStatus = smokingStatusMap[input.smokingStatus] ?? null;
   const heightMeters = height / 100;
   const bmi = Number((weight / (heightMeters * heightMeters)).toFixed(1));
 
   const features = {
+    age,
+    gender,
+    bmi,
+    blood_pressure: systolic,
+    cholesterol: Number.isFinite(cholesterol) && cholesterol > 0 ? cholesterol : null,
+    glucose: Number.isFinite(glucose) && glucose > 0 ? glucose : null,
+    smoking_status: smokingStatus,
     HighBP: systolic >= 130 || diastolic >= 80 ? 1 : 0,
     HighChol: null,
     CholCheck: 1,
@@ -109,6 +125,7 @@ function buildFeatureMap(input) {
 
   return {
     values: modelArtifacts.columns.map((column) => features[column]),
+    clusterValues: modelArtifacts.kmeans.columns.map((column) => features[column]),
     summary: {
       age,
       weight,
@@ -117,6 +134,10 @@ function buildFeatureMap(input) {
       diastolic,
       activityLevel,
       dietType: dietType === "Average" ? "Mixed" : dietType,
+      gender: input.gender || "Not provided",
+      cholesterol: features.cholesterol,
+      glucose: features.glucose,
+      smokingStatus: input.smokingStatus || "Not provided",
     },
     bmi,
   };
@@ -192,7 +213,17 @@ function predictDiabetesProbability(values) {
   return sigmoid(linear);
 }
 
-function applyClinicalGuardrails({ band, bmi, riskScore, systolic, diastolic }) {
+function applyClinicalGuardrails({
+  age,
+  band,
+  bmi,
+  cholesterol,
+  glucose,
+  riskScore,
+  smokingStatus,
+  systolic,
+  diastolic,
+}) {
   let adjustedBand = band;
   let adjustedRiskScore = riskScore;
   let reason = null;
@@ -214,6 +245,21 @@ function applyClinicalGuardrails({ band, bmi, riskScore, systolic, diastolic }) 
       : "Blood pressure is elevated";
   }
 
+  const moderateReasons = [];
+
+  if (bmi >= 25) moderateReasons.push("BMI is above the normal range");
+  if (systolic >= 130 || diastolic >= 85) moderateReasons.push("blood pressure is elevated");
+  if (age >= 45) moderateReasons.push("age increases baseline risk");
+  if (smokingStatus === "Smoker") moderateReasons.push("smoking is a risk factor");
+  if (cholesterol >= 240) moderateReasons.push("cholesterol is elevated");
+  if (glucose >= 126) moderateReasons.push("glucose is elevated");
+
+  if (adjustedBand.key === "low" && moderateReasons.length > 0) {
+    adjustedBand = bandMeta["Medium Risk"];
+    adjustedRiskScore = Math.max(adjustedRiskScore, 44);
+    reason = moderateReasons[0];
+  }
+
   return {
     band: adjustedBand,
     riskScore: clamp(adjustedRiskScore, adjustedBand.scoreMin, adjustedBand.scoreMax),
@@ -222,8 +268,8 @@ function applyClinicalGuardrails({ band, bmi, riskScore, systolic, diastolic }) 
 }
 
 export function clusterUser(input) {
-  const { values, summary, bmi } = buildFeatureMap(input);
-  const { cluster, distances } = predictCluster(values);
+  const { values, clusterValues, summary, bmi } = buildFeatureMap(input);
+  const { cluster, distances } = predictCluster(clusterValues);
   const learnedClusterName = modelArtifacts.clusterNames[String(cluster)] || "Medium Risk";
   const band = bandMeta[learnedClusterName] || bandMeta["Medium Risk"];
   const diabetesProbability = predictDiabetesProbability(values);
@@ -237,9 +283,13 @@ export function clusterUser(input) {
     band.scoreMin + bandPosition * (band.scoreMax - band.scoreMin),
   );
   const adjusted = applyClinicalGuardrails({
+    age: summary.age,
     band,
     bmi,
+    cholesterol: summary.cholesterol,
+    glucose: summary.glucose,
     riskScore: modelRiskScore,
+    smokingStatus: summary.smokingStatus,
     systolic: summary.systolic,
     diastolic: summary.diastolic,
   });

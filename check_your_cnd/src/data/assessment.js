@@ -1,9 +1,12 @@
 import {
   ActivityIcon,
+  AlertIcon,
   AppleIcon,
   BicycleIcon,
+  CheckCircleIcon,
   FootstepsIcon,
   GaugeIcon,
+  InfoIcon,
   SaladIcon,
   PizzaIcon,
   ScaleIcon,
@@ -49,6 +52,21 @@ export const activityOptions = [
   },
 ];
 
+export const genderOptions = [
+  {
+    label: "Female",
+    icon: UserIcon,
+  },
+  {
+    label: "Male",
+    icon: UserIcon,
+  },
+  {
+    label: "Unknown",
+    icon: InfoIcon,
+  },
+];
+
 export const dietOptions = [
   {
     label: "Healthy",
@@ -61,5 +79,20 @@ export const dietOptions = [
   {
     label: "Unhealthy",
     icon: PizzaIcon,
+  },
+];
+
+export const smokingOptions = [
+  {
+    label: "Non-Smoker",
+    icon: CheckCircleIcon,
+  },
+  {
+    label: "Smoker",
+    icon: AlertIcon,
+  },
+  {
+    label: "Unknown",
+    icon: InfoIcon,
   },
 ];

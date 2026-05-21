@@ -46,6 +46,16 @@ button {
   font-family: inherit;
 }
 
+.option-card:has(input:checked) {
+  border-color: #3b82f6;
+  box-shadow: 0 12px 24px rgba(59, 130, 246, 0.14);
+}
+
+.option-card:has(input:checked) .option-card-icon {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
 ::selection {
   background: #bfdbfe;
   color: #071a3d;

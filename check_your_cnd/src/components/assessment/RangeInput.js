@@ -18,16 +18,15 @@ export function RangeInput({ label, name, min, max, value, unit, onChange }) {
             id={inputId}
             name={name}
             className="h-[54px] w-[100px] rounded-[16px] border-2 border-[#dce6f2] bg-white px-4 text-center text-[21px] font-bold text-blue-500 outline-none transition focus:border-blue-400"
-            type="text"
+            type="number"
             inputMode="numeric"
-            pattern="[0-9]*"
             min={min}
             max={max}
             value={value}
             onBlur={clampAndCommit}
             onChange={(event) => {
               const nextValue = event.target.value;
-              if (/^\d*$/.test(nextValue)) {
+              if (nextValue === "" || Number(nextValue) >= 0) {
                 onChange(nextValue);
               }
             }}

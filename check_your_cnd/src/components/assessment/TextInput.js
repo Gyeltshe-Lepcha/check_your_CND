@@ -19,9 +19,8 @@ export function TextInput({
         id={inputId}
         name={name}
         className="h-16 w-full rounded-[20px] border-2 border-[#dce6f2] bg-white px-5 text-[20px] text-[#061633] outline-none transition placeholder:text-[#8a96a8] focus:border-blue-400"
-        type={isNumeric ? "text" : type}
+        type={type}
         inputMode={isNumeric ? "numeric" : undefined}
-        pattern={isNumeric ? "[0-9]*" : undefined}
         min={min}
         max={max}
         required={required}
@@ -29,7 +28,7 @@ export function TextInput({
         value={value}
         onChange={(event) => {
           const nextValue = event.target.value;
-          if (!isNumeric || /^\d*$/.test(nextValue)) {
+          if (!isNumeric || nextValue === "" || Number(nextValue) >= 0) {
             onChange(nextValue);
           }
         }}
