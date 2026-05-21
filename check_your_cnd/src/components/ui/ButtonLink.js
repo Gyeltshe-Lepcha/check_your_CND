@@ -2,7 +2,7 @@ import { ArrowRightIcon } from "@/components/icons/Icons";
 
 export function ButtonLink({
   children,
-  href = "#assessment",
+  href = "/assessment",
   variant = "primary",
   size = "large",
   className = "",

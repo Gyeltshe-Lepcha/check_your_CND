@@ -20,7 +20,7 @@ export function CtaSection() {
             </p>
             <ButtonLink
               className="mt-[26px] min-h-[65px] min-w-[330px] rounded-[20px] px-8 text-[20px] max-sm:min-w-0 max-sm:w-full"
-              href="#assessment"
+              href="/assessment"
               variant="inverse"
             >
               Start Free Assessment
